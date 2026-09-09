@@ -1,0 +1,13 @@
+method,topic_id,document_count,share,assignment_basis
+LDA,1,713,0.16519925857275256,highest LDA topic probability
+LDA,2,188,0.04355885078776645,highest LDA topic probability
+LDA,3,825,0.19114921223354958,highest LDA topic probability
+LDA,4,31,0.007182576459684893,highest LDA topic probability
+LDA,5,98,0.022706209453197405,highest LDA topic probability
+LDA,6,2323,0.5382298424467099,highest LDA topic probability
+LDA,7,80,0.018535681186283594,highest LDA topic probability
+LDA,8,58,0.013438368860055607,highest LDA topic probability
+LSA,1,3684,0.8535681186283596,largest absolute LSA component loading
+LSA,2,116,0.026876737720111215,largest absolute LSA component loading
+LSA,3,391,0.09059314179796107,largest absolute LSA component loading
+LSA,4,125,0.02896200185356812,largest absolute LSA component loading
