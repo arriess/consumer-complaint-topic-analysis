@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated data/results
+data/*.csv
+outputs/tables/*.json
+outputs/tables/*.csv
+outputs/figures/*.png
+
+# Keep directory documentation
+!data/README.md
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
