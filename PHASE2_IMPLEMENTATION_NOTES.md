@@ -1,9 +1,8 @@
 # Phase 2 implementation status
 
-## Completed in code
+## Completed in code and executed
 
-The project now covers the required technical workflow for the development
-phase:
+The project covers the required technical workflow for the development phase:
 
 1. acquire/validate the selected complaint dataset
 2. remove empty narratives and duplicate narratives
@@ -18,51 +17,29 @@ phase:
 11. calculate document assignment / prevalence
 12. generate result tables and visualizations
 
+## Executed corpus facts
+
+The selected file contained 5,000 complaint rows. After removing 683 exact duplicate narratives, 4,317 records remained. One record became empty after preprocessing, leaving 4,316 documents for modeling.
+
+The implementation also established that the sample is limited to the CFPB product category "Credit reporting, credit repair services, or other personal consumer reports" and the issue "Incorrect information on your report". The analysis is therefore interpreted as recurring subthemes within this complaint category rather than a representative sample of all CFPB complaints.
+
 ## Model-selection diagnostics
 
-The code reports:
+The executed code reports:
 
 - NPMI coherence for both LDA and LSA
 - topic diversity for both methods
 - LDA perplexity
 - cumulative explained variance for LSA
 
-The selected topic count is the candidate with the highest executed NPMI
-coherence, using topic diversity as the first tie-breaker.
+Candidate counts 4–8 were tested. The highest NPMI coherence was obtained by the 8-topic LDA solution (0.2411) and the 4-component LSA solution (0.3421). Topic diversity was used as the first tie-breaker. The 6-topic LDA result was close in coherence, so the 8-topic selection should not be treated as an unambiguous optimum.
 
-This rule is deliberately explicit so the final written portfolio can explain
-why a particular topic count was selected.
+## Implementation adjustment
+
+Phase 1 proposed WordNet lemmatization. During execution, the NLTK language resources could not be retrieved in the runtime environment. To preserve reproducibility, preprocessing was changed to a deterministic offline procedure using scikit-learn English stop words and regex tokenization. This deviation is documented explicitly rather than hidden.
 
 ## Important interpretation rule
 
-LDA topic weights are probabilities. They can be interpreted as a document's
-topic mixture.
+LDA topic weights are probabilities and support direct topic-prevalence interpretation. LSA components are signed latent dimensions, not probabilities. The LSA document shares in the results are therefore descriptive assignments based on the largest absolute component loading and must not be described as probabilistic prevalence.
 
-LSA components are not probabilities and can have positive or negative values.
-The code therefore uses absolute component magnitude only for identifying
-strongly associated representative documents and for a descriptive component
-assignment. The final report should not describe LSA assignment shares as
-probabilistic topic prevalence.
-
-## Still dependent on execution
-
-Do not write final numerical findings until the pipeline has actually run.
-
-The following must come from the generated output files:
-
-- number of usable complaint narratives
-- vocabulary size
-- vector-matrix sparsity
-- selected LDA topic count
-- selected LSA component count
-- coherence values
-- perplexity
-- explained variance
-- actual top terms
-- topic labels
-- representative complaint examples
-- prevalence/assignment shares
-- final interpretation and limitations
-
-Once those outputs exist, the Phase 2 written reflection can be drafted using
-only observed results.
+See `RESULTS_SUMMARY.md` and `outputs/tables/` for the executed numerical findings.
