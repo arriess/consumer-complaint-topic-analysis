@@ -1,0 +1,17 @@
+{
+  "source_url": "https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/main/Data/complaints_sample.csv",
+  "raw_rows": 5000,
+  "raw_columns": 18,
+  "expected_rows": 5000,
+  "expected_columns": 18,
+  "narrative_column_detected": "consumer_complaint_narrative",
+  "missing_or_empty_narratives": 0,
+  "duplicate_nonempty_narratives": 683,
+  "modeling_rows_after_nonempty_and_deduplication": 4317,
+  "document_word_count": {
+    "min": 1,
+    "median": 95.0,
+    "mean": 158.57516794069957,
+    "max": 3301
+  }
+}
