@@ -1,0 +1,13 @@
+method,topic_id,interpretive_label
+LDA,1,Credit-file inaccuracies and mixed disputes
+LDA,2,"Account opening, balance, and charge details"
+LDA,3,Identity theft and fraudulent accounts
+LDA,4,Debt collection and legal-compliance allegations
+LDA,5,Formal inaccurate-information correction requests
+LDA,6,"Payment, loan, and account-status reporting"
+LDA,7,Identity-theft blocking and FCRA rights
+LDA,8,Furnisher and inquiry evidence disputes
+LSA,1,General credit-report and account disputes
+LSA,2,Fraudulent charge and account-opening details
+LSA,3,Unknown or fraudulent credit-file items
+LSA,4,Identity-theft victim and blocking-rights language
