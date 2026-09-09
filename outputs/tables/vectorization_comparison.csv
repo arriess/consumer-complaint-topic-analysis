@@ -1,0 +1,3 @@
+method,documents,features,nonzero_entries,sparsity,matrix_value_interpretation
+Bag of Words,4316,5000,255559,0.9881575996292864,term counts
+TF-IDF,4316,5000,255559,0.9881575996292864,TF-IDF weights
