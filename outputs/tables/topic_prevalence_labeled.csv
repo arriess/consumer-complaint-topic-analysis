@@ -1,0 +1,13 @@
+method,topic_id,document_count,share,assignment_basis,interpretive_label
+LDA,1,713,0.1651992585727525,highest LDA topic probability,Credit-file inaccuracies and mixed disputes
+LDA,2,188,0.0435588507877664,highest LDA topic probability,"Account opening, balance, and charge details"
+LDA,3,825,0.1911492122335495,highest LDA topic probability,Identity theft and fraudulent accounts
+LDA,4,31,0.0071825764596848,highest LDA topic probability,Debt collection and legal-compliance allegations
+LDA,5,98,0.0227062094531974,highest LDA topic probability,Formal inaccurate-information correction requests
+LDA,6,2323,0.5382298424467099,highest LDA topic probability,"Payment, loan, and account-status reporting"
+LDA,7,80,0.0185356811862835,highest LDA topic probability,Identity-theft blocking and FCRA rights
+LDA,8,58,0.0134383688600556,highest LDA topic probability,Furnisher and inquiry evidence disputes
+LSA,1,3684,0.8535681186283596,largest absolute LSA component loading,General credit-report and account disputes
+LSA,2,116,0.0268767377201112,largest absolute LSA component loading,Fraudulent charge and account-opening details
+LSA,3,391,0.090593141797961,largest absolute LSA component loading,Unknown or fraudulent credit-file items
+LSA,4,125,0.0289620018535681,largest absolute LSA component loading,Identity-theft victim and blocking-rights language
