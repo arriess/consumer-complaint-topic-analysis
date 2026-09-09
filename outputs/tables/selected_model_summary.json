@@ -1,0 +1,18 @@
+{
+  "selection_rule": "highest NPMI coherence among tested topic counts; topic diversity used as first tie-breaker",
+  "candidate_topic_counts": [4, 5, 6, 7, 8],
+  "selected_lda_topics": 8,
+  "selected_lsa_components": 4,
+  "random_state": 42,
+  "vectorizer_parameters": {
+    "min_df": 5,
+    "max_df": 0.95,
+    "max_features": 5000,
+    "ngram_range": [1, 2],
+    "tfidf_sublinear_tf": true
+  },
+  "interpretation_notes": {
+    "lda": "LDA document-topic values are probabilities and can support direct topic-prevalence interpretation.",
+    "lsa": "LSA components are signed latent dimensions, not probability distributions. Prevalence is reported only as document assignment using largest absolute component loading."
+  }
+}
