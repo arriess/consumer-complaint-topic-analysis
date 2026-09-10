@@ -29,7 +29,7 @@ The selected public `complaints_sample.csv` contains 5,000 CFPB complaints, all 
 - Selected LDA solution: **8 topics**
 - Selected LSA solution: **4 components**
 
-See `RESULTS_SUMMARY.md` for the complete executed results.
+See `RESULTS_SUMMARY.md` for the complete executed results and `PHASE2_REFLECTION.md` for the finalized development/reflection text.
 
 ## Project structure
 
@@ -38,7 +38,7 @@ consumer-complaint-topic-analysis/
 ├── README.md
 ├── RESULTS_SUMMARY.md
 ├── PHASE2_IMPLEMENTATION_NOTES.md
-├── PHASE2_REFLECTION_DRAFT.md
+├── PHASE2_REFLECTION.md
 ├── requirements.txt
 ├── .gitignore
 ├── data/
@@ -91,7 +91,7 @@ The first script downloads the selected public sample if `data/complaints_sample
 
 ## Preprocessing
 
-The final executable preprocessing is deliberately self-contained:
+The final executable preprocessing is self-contained:
 
 - lowercase
 - remove URLs and e-mail artefacts
@@ -100,7 +100,7 @@ The final executable preprocessing is deliberately self-contained:
 - regex tokenization
 - remove scikit-learn English stop words
 
-The Phase 1 conception mentioned WordNet lemmatization. During execution the NLTK corpora could not be retrieved in the environment, so the implementation was changed to avoid an external runtime resource dependency. This change is documented in the Phase 2 reflection.
+The Phase 1 conception mentioned WordNet lemmatization. During execution the NLTK corpora could not be retrieved in the environment, so the implementation was changed to avoid an external runtime resource dependency. This change is documented explicitly in the Phase 2 reflection.
 
 ## Modeling settings
 
