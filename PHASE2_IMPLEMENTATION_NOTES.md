@@ -34,9 +34,9 @@ The executed code reports:
 
 Candidate counts 4–8 were tested. The highest NPMI coherence was obtained by the 8-topic LDA solution (0.2411) and the 4-component LSA solution (0.3421). Topic diversity was used as the first tie-breaker. The 6-topic LDA result was close in coherence, so the 8-topic selection should not be treated as an unambiguous optimum.
 
-## Implementation adjustment
+## Development issue and response
 
-Phase 1 proposed WordNet lemmatization. During execution, the NLTK language resources could not be retrieved in the runtime environment. To preserve reproducibility, preprocessing was changed to a deterministic offline procedure using scikit-learn English stop words and regex tokenization. This deviation is documented explicitly rather than hidden.
+Validation showed that the selected public sample was much narrower than a generic consumer-complaint corpus: all records concern incorrect information on credit reports. Rather than overgeneralize the findings, the interpretation was restricted to recurring subthemes within this category. Exact duplicates were removed, while the remaining near-duplicate legal or dispute templates are documented as a limitation because they can influence topic structure.
 
 ## Important interpretation rule
 
