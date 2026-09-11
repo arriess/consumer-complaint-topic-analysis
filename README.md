@@ -4,7 +4,7 @@ Final reproducible implementation for the IU **DLBDSEDA02 - Project: Data Analys
 
 ## Project objective
 
-The project uses NLP to identify recurring subthemes in unstructured complaint narratives so that frequently raised concerns can be summarized without manually reading every record.
+The project uses NLP to identify recurring subthemes in unstructured complaint narratives so that frequently raised concerns can be summarized without manually reading every record. The practical success criterion is not a single model score: the workflow must produce reproducible, interpretable recurring themes and transparent document-assignment shares while keeping the limits of the sample explicit.
 
 ## Actual dataset scope
 
@@ -22,6 +22,14 @@ The selected public `complaints_sample.csv` contains 5,000 CFPB complaints, all 
 8. Extract top terms and representative complaints.
 9. Calculate topic/component assignment shares.
 10. Generate diagnostic and prevalence visualizations.
+11. Optionally stress-test the selected topic structures across multiple random seeds.
+
+## Why these methods
+
+- **Bag of Words -> LDA:** LDA is a probabilistic count-based topic model, so raw term counts provide the natural input while retaining direct interpretability.
+- **TF-IDF -> LSA:** TF-IDF down-weights corpus-wide vocabulary and emphasizes discriminative terms before truncated SVD extracts latent semantic directions.
+- **Comparable vocabulary:** both representations use the same `min_df`, `max_df`, feature cap and unigram/bigram range so differences are less confounded by vocabulary construction.
+- **Multiple diagnostics:** NPMI coherence and topic diversity are compared across both methods, while LDA perplexity and LSA cumulative explained variance are retained as method-specific diagnostics. Final interpretation also considers top terms and representative documents rather than optimizing one metric in isolation.
 
 ## Executed results
 
@@ -36,7 +44,7 @@ The selected public `complaints_sample.csv` contains 5,000 CFPB complaints, all 
 
 The 8-topic LDA solution provides more granular, probabilistic themes. The 4-component LSA solution provides broader latent semantic dimensions and achieved higher NPMI coherence in the tested candidates. LSA component shares are descriptive assignments based on the largest absolute component loading, not probabilities.
 
-See `RESULTS_SUMMARY.md` for the complete executed results and `REPRODUCIBILITY.md` for the independently re-run verification.
+See `RESULTS_SUMMARY.md` for the complete executed results and `REPRODUCIBILITY.md` for the independently re-run verification and multi-seed stress test.
 
 ## Project structure
 
@@ -59,10 +67,12 @@ consumer-complaint-topic-analysis/
 │   ├── figures/
 │   │   └── README.md
 │   └── tables/
+│       └── stability_check.csv
 └── src/
     ├── 01_acquire_validate.py
     ├── 02_preprocess.py
-    └── 03_vectorize_and_model.py
+    ├── 03_vectorize_and_model.py
+    └── 04_stability_check.py
 ```
 
 ## Setup
@@ -101,7 +111,13 @@ python src/02_preprocess.py
 python src/03_vectorize_and_model.py
 ```
 
-`run_phase2.py` is retained as the historical development-phase runner and executes the same three stages.
+Optional multi-seed robustness check after the core run:
+
+```bash
+python src/04_stability_check.py
+```
+
+`run_phase2.py` is retained as the historical development-phase runner and executes the same three core stages.
 
 If the selected dataset is not already present, the acquisition script downloads the exact public `complaints_sample.csv` snapshot automatically. The dataset SHA-256 used in the final verification is recorded in `data/README.md` and `REPRODUCIBILITY.md`.
 
@@ -139,10 +155,18 @@ The automated pipeline generates data-validation statistics, vectorization compa
 
 Generated source data, representative-complaint exports, and PNG figures are not committed by default; they are recreated by `python run_analysis.py`. The committed reference tables provide compact evidence of the executed results.
 
+## Reliability, maintainability and scalability
+
+- **Reliability:** the workflow validates the expected data structure, fixes stochastic seeds for the submitted models, records exact dependencies, stores a source-file checksum, and includes an independent rerun plus multi-seed robustness check.
+- **Maintainability:** acquisition/validation, preprocessing, modeling and optional stability analysis are separated into clear stages with a single neutral runner for the core workflow and documented outputs.
+- **Scalability:** sparse document-term matrices and a 5,000-feature cap keep memory use controlled for the selected corpus. The project does **not** claim large-scale production scalability because performance was verified only on the 4,316 modeled documents.
+
 ## Reproducibility verification
 
-Before Phase 3 submission, an independent rerun reproduced the core counts and model diagnostics, including the 4,316 modeled documents, 98.82% matrix sparsity, LDA NPMI 0.2411 at 8 topics, LSA NPMI 0.3421 at 4 components, and the 53.82% largest LDA assignment share. Exact package versions and the source-file hash are documented in `REPRODUCIBILITY.md`.
+Before Phase 3 submission, an independent rerun reproduced the core counts and model diagnostics, including the 4,316 modeled documents, 98.82% matrix sparsity, LDA NPMI 0.2411 at 8 topics, LSA NPMI 0.3421 at 4 components, and the 53.82% largest LDA assignment share.
+
+A five-seed stress test additionally showed that 8-topic LDA retained a small mean NPMI advantage over 6-topic LDA (**0.2184 vs. 0.2156**) and lower mean perplexity (**780.59 vs. 858.08**), while LSA-4 reproduced the same diagnostics for all tested seeds. This supports the chosen LDA granularity but also demonstrates why the result should not be presented as uniquely optimal. Exact package versions, the source-file hash, and the complete stability table are documented in `REPRODUCIBILITY.md` and `outputs/tables/stability_check.csv`.
 
 ## Limitations
 
-The public sample is deliberately narrow, so conclusions are limited to recurring subthemes within incorrect credit-reporting complaints. Exact duplicates are removed, but near-duplicate legal or dispute templates can still influence the learned topic structure. The 8-topic LDA choice should also be interpreted cautiously because the 6-topic LDA model had very similar coherence.
+The public sample is deliberately narrow, so conclusions are limited to recurring subthemes within incorrect credit-reporting complaints. Exact duplicates are removed, but near-duplicate legal or dispute templates can still influence the learned topic structure. LDA is also seed-sensitive, reinforcing the decision to interpret the 8-topic solution as a defensible analytical view rather than a unique ground truth.
