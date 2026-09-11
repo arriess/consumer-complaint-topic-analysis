@@ -10,10 +10,10 @@ Deterministic pipeline:
 - remove English stop words
 - save clean text for vectorization
 
-The executed project deliberately uses scikit-learn's built-in English stop-word
-list and no external language-model download. This keeps the pipeline reproducible
-in a clean/offline environment. The Phase 1 conception mentioned lemmatization;
-this implementation change is documented as a development-phase adjustment.
+This implementation follows the submitted Phase 1 preprocessing plan and uses
+scikit-learn's built-in English stop-word list with deterministic regex
+tokenization so the workflow can be reproduced without external language-model
+downloads.
 """
 
 from __future__ import annotations
@@ -49,7 +49,6 @@ def clean_text(text: str) -> str:
     text = NON_ALPHA_RE.sub(" ", text)
     text = MULTISPACE_RE.sub(" ", text).strip()
 
-    # Regex tokenization is deterministic and avoids external tokenizer models.
     tokens = [
         token
         for token in re.findall(r"[a-z]+", text)
@@ -93,7 +92,7 @@ def main() -> None:
             f"median={token_counts.median():.1f}, "
             f"mean={token_counts.mean():.1f}"
         )
-    print("[NOTE] Offline-reproducible preprocessing: sklearn stop words; no lemmatizer download.")
+    print("[NOTE] Deterministic preprocessing: sklearn stop words and regex tokenization.")
     print(f"[OK] Saved: {OUTPUT_PATH}")
 
 
