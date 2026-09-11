@@ -40,9 +40,20 @@ The verification run reproduced the core project facts and diagnostics:
 - selected LSA model: **4 components**, NPMI **0.3421**, topic diversity **0.8000**, cumulative explained variance **4.81%**
 - largest LDA assignment share: **53.82%**
 
-The 6-topic LDA solution reproduced an NPMI coherence of approximately **0.2390**, confirming that the 8-topic selection is only marginally stronger on coherence and should be interpreted cautiously.
+The 6-topic LDA solution reproduced an NPMI coherence of approximately **0.2390**, confirming that the 8-topic selection is only marginally stronger on the fixed-seed coherence result and should be interpreted cautiously.
 
-## Run command
+## Multi-seed robustness check
+
+A final robustness check evaluated the selected neighborhood across random seeds **7, 21, 42, 84, and 123**. This does not replace the submitted fixed-seed models; it tests how sensitive the conclusion is to random initialization.
+
+- 6-topic LDA mean NPMI: **0.2156**; mean perplexity: **858.08**
+- 8-topic LDA mean NPMI: **0.2184**; mean perplexity: **780.59**
+- 8-topic LDA therefore retained a small mean coherence advantage and substantially lower mean perplexity, but its topic diversity was lower (**0.6375** mean vs. **0.6767** for k=6).
+- 4-component LSA reproduced NPMI **0.3421**, topic diversity **0.8000**, and explained variance **4.81%** for every tested seed.
+
+The stress test supports retaining the original 8-topic LDA as a defensible granular solution while making clear that LDA topic structure is seed-sensitive and should not be presented as uniquely optimal. The executed values are committed in `outputs/tables/stability_check.csv`; the optional check can be reproduced with `python src/04_stability_check.py` after the core pipeline.
+
+## Run commands
 
 For the final project use:
 
@@ -50,7 +61,13 @@ For the final project use:
 python run_analysis.py
 ```
 
-The historical `run_phase2.py` runner is retained because it was used during the development phase; both execute the same three analysis stages.
+Optional multi-seed robustness check:
+
+```bash
+python src/04_stability_check.py
+```
+
+The historical `run_phase2.py` runner is retained because it was used during the development phase; both core runners execute the same three analysis stages.
 
 ## Automated vs interpreted outputs
 
