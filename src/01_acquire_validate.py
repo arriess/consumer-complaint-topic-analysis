@@ -1,14 +1,15 @@
 """
-Phase 2 - Step 1: Acquire and validate the CFPB complaint sample.
+Phase 2 - Step 1: Acquire and validate the selected CFPB complaint sample.
 
-This script deliberately does NOT invent or silently resample data.
-It downloads the exact public complaints_sample.csv selected in Phase 1,
-checks its structure, reports data-quality facts, and prepares a modeling
-dataset containing non-empty, unique complaint narratives.
+The script downloads the exact public complaints_sample.csv snapshot selected in
+Phase 1, verifies its SHA-256 identity, checks the expected structure, reports
+data-quality and scope facts, and prepares a modeling dataset containing
+non-empty, unique complaint narratives.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import urllib.request
@@ -21,6 +22,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "tables"
 
+# The original records come from the CFPB Consumer Complaint Database. The
+# project uses the fixed public 5,000-row snapshot below so the portfolio can be
+# reproduced against an immutable, verifiable input rather than a changing live
+# database export.
+OFFICIAL_CFPB_URL = "https://www.consumerfinance.gov/data-research/consumer-complaints/"
 DATA_URL = (
     "https://raw.githubusercontent.com/"
     "andygreen-1/Text_Analysis_Consumer_Complaints/"
@@ -32,15 +38,17 @@ SUMMARY_PATH = OUTPUT_DIR / "data_validation_summary.json"
 
 EXPECTED_ROWS = 5000
 EXPECTED_COLUMNS = 18
+EXPECTED_SHA256 = "0f19b276e8f1863419a0cdcba6bf9ca2924046f21cd8958f79258b8ecfd81a4a"
 
 NARRATIVE_CANDIDATES = (
     "Consumer complaint narrative",
     "Consumer_complaint_narrative",
+    "consumer_complaint_narrative",
 )
 
 
 def normalize_name(name: str) -> str:
-    return "".join(ch.lower() for ch in name if ch.isalnum())
+    return "".join(ch.lower() for ch in str(name) if ch.isalnum())
 
 
 def find_column(columns, candidates):
@@ -52,28 +60,57 @@ def find_column(columns, candidates):
     return None
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify_source_identity(path: Path) -> str:
+    actual = sha256_file(path)
+    if actual != EXPECTED_SHA256:
+        raise ValueError(
+            "Dataset checksum mismatch. The file is not the verified snapshot "
+            f"used for this project. Expected {EXPECTED_SHA256}, found {actual}."
+        )
+    print(f"[OK] Dataset SHA-256 confirmed: {actual}")
+    return actual
+
+
 def download_if_needed() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     if RAW_PATH.exists() and RAW_PATH.stat().st_size > 0:
         print(f"[OK] Dataset already exists: {RAW_PATH}")
+        verify_source_identity(RAW_PATH)
         return
 
-    print(f"[INFO] Downloading dataset from:\n{DATA_URL}")
+    print(f"[INFO] Downloading verified snapshot from:\n{DATA_URL}")
     try:
         urllib.request.urlretrieve(DATA_URL, RAW_PATH)
     except Exception as exc:
         raise RuntimeError(
-            "Dataset download failed. Check your internet connection, or manually "
-            f"download complaints_sample.csv and place it at:\n{RAW_PATH}"
+            "Dataset download failed. Check the internet connection, or manually "
+            f"place the verified complaints_sample.csv at:\n{RAW_PATH}"
         ) from exc
 
+    verify_source_identity(RAW_PATH)
     print(f"[OK] Downloaded: {RAW_PATH}")
+
+
+def counts_dict(series: pd.Series) -> dict[str, int]:
+    return {
+        str(key): int(value)
+        for key, value in series.fillna("<missing>").value_counts(dropna=False).items()
+    }
 
 
 def main() -> None:
     download_if_needed()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    source_sha256 = verify_source_identity(RAW_PATH)
     df = pd.read_csv(RAW_PATH)
 
     print("\n=== RAW DATASET ===")
@@ -81,20 +118,18 @@ def main() -> None:
     print(f"Columns: {len(df.columns):,}")
 
     if len(df) != EXPECTED_ROWS:
-        print(
-            f"[WARNING] Expected {EXPECTED_ROWS:,} rows from the selected snapshot, "
-            f"but found {len(df):,}. No automatic resampling was performed."
+        raise ValueError(
+            f"Expected {EXPECTED_ROWS:,} rows from the verified snapshot, "
+            f"but found {len(df):,}."
         )
-    else:
-        print(f"[OK] Expected row count confirmed: {EXPECTED_ROWS:,}")
+    print(f"[OK] Expected row count confirmed: {EXPECTED_ROWS:,}")
 
     if len(df.columns) != EXPECTED_COLUMNS:
-        print(
-            f"[WARNING] Expected {EXPECTED_COLUMNS} columns, but found "
-            f"{len(df.columns)}. Continue only after checking the source."
+        raise ValueError(
+            f"Expected {EXPECTED_COLUMNS} columns from the verified snapshot, "
+            f"but found {len(df.columns)}."
         )
-    else:
-        print(f"[OK] Expected column count confirmed: {EXPECTED_COLUMNS}")
+    print(f"[OK] Expected column count confirmed: {EXPECTED_COLUMNS}")
 
     narrative_col = find_column(df.columns, NARRATIVE_CANDIDATES)
     if narrative_col is None:
@@ -102,7 +137,6 @@ def main() -> None:
             "Could not find the complaint narrative column. Available columns:\n"
             + "\n".join(map(str, df.columns))
         )
-
     print(f"[OK] Narrative column: {narrative_col!r}")
 
     raw_narratives = df[narrative_col]
@@ -114,10 +148,8 @@ def main() -> None:
         nonempty[narrative_col].astype(str).str.strip().duplicated().sum()
     )
 
-    # Preserve first occurrence only, exactly as declared in Phase 1.
     nonempty[narrative_col] = nonempty[narrative_col].astype(str).str.strip()
     modeling = nonempty.drop_duplicates(subset=[narrative_col], keep="first").copy()
-
     word_counts = modeling[narrative_col].str.split().str.len()
 
     # Add a stable normalized field while retaining all original metadata.
@@ -127,7 +159,9 @@ def main() -> None:
     modeling.to_csv(MODELING_PATH, index=False)
 
     summary = {
-        "source_url": DATA_URL,
+        "official_source": OFFICIAL_CFPB_URL,
+        "technical_snapshot_url": DATA_URL,
+        "source_sha256": source_sha256,
         "raw_rows": int(len(df)),
         "raw_columns": int(len(df.columns)),
         "expected_rows": EXPECTED_ROWS,
@@ -144,19 +178,46 @@ def main() -> None:
         },
     }
 
-    for col in ("Product", "Issue"):
-        if col in modeling.columns:
-            summary[f"top_{col.lower()}_counts"] = {
-                str(k): int(v)
-                for k, v in modeling[col].fillna("<missing>").value_counts().head(10).items()
-            }
+    product_col = find_column(df.columns, ("product",))
+    issue_col = find_column(df.columns, ("issue",))
+    sub_issue_col = find_column(df.columns, ("sub_issue", "sub issue"))
+    date_col = find_column(df.columns, ("date_received", "date received"))
+
+    if product_col:
+        summary["distinct_product_count"] = int(df[product_col].nunique(dropna=False))
+        summary["product_counts"] = counts_dict(df[product_col])
+    if issue_col:
+        summary["distinct_issue_count"] = int(df[issue_col].nunique(dropna=False))
+        summary["issue_counts"] = counts_dict(df[issue_col])
+    if sub_issue_col:
+        summary["distinct_sub_issue_count"] = int(df[sub_issue_col].nunique(dropna=False))
+        summary["sub_issue_counts"] = counts_dict(df[sub_issue_col])
+    if date_col:
+        parsed_dates = pd.to_datetime(df[date_col], errors="coerce")
+        summary["date_received_min"] = (
+            parsed_dates.min().date().isoformat() if parsed_dates.notna().any() else None
+        )
+        summary["date_received_max"] = (
+            parsed_dates.max().date().isoformat() if parsed_dates.notna().any() else None
+        )
 
     SUMMARY_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print("\n=== DATA-QUALITY RESULTS ===")
-    print(f"Missing/empty narratives:      {missing_or_empty:,}")
-    print(f"Duplicate non-empty narratives:{duplicate_narratives:,}")
-    print(f"Rows kept for modeling:        {len(modeling):,}")
+    print(f"Missing/empty narratives:       {missing_or_empty:,}")
+    print(f"Duplicate non-empty narratives: {duplicate_narratives:,}")
+    print(f"Rows kept for modeling:         {len(modeling):,}")
+    if product_col:
+        print(f"Distinct products:              {summary['distinct_product_count']:,}")
+    if issue_col:
+        print(f"Distinct issues:                {summary['distinct_issue_count']:,}")
+    if sub_issue_col:
+        print(f"Distinct sub-issues:            {summary['distinct_sub_issue_count']:,}")
+    if date_col:
+        print(
+            "Date range:                       "
+            f"{summary['date_received_min']} to {summary['date_received_max']}"
+        )
 
     if len(word_counts):
         print(
