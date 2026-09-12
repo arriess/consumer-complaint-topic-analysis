@@ -4,10 +4,16 @@ The complaint records originate from the **Consumer Financial Protection Bureau 
 
 https://www.consumerfinance.gov/data-research/consumer-complaints/
 
-For reproducibility, this project analyzes the fixed public 5,000-row `complaints_sample.csv` snapshot selected in Phase 1 rather than a changing live export. `src/01_acquire_validate.py` downloads that technical snapshot from:
+For reproducibility, this project analyzes the fixed public 5,000-row `complaints_sample.csv` snapshot selected in Phase 1 rather than a changing live export. The upstream file was added in commit:
 
 ```text
-https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/main/Data/complaints_sample.csv
+edc801edb9a2a30172b0fc70b7c16b41a02d0368
+```
+
+`src/01_acquire_validate.py` therefore downloads the immutable commit-pinned technical snapshot from:
+
+```text
+https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/edc801edb9a2a30172b0fc70b7c16b41a02d0368/Data/complaints_sample.csv
 ```
 
 The exact snapshot used for final verification has SHA-256:
