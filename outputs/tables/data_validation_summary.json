@@ -1,6 +1,7 @@
 {
   "official_source": "https://www.consumerfinance.gov/data-research/consumer-complaints/",
-  "technical_snapshot_url": "https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/main/Data/complaints_sample.csv",
+  "technical_snapshot_commit": "edc801edb9a2a30172b0fc70b7c16b41a02d0368",
+  "technical_snapshot_url": "https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/edc801edb9a2a30172b0fc70b7c16b41a02d0368/Data/complaints_sample.csv",
   "source_sha256": "0f19b276e8f1863419a0cdcba6bf9ca2924046f21cd8958f79258b8ecfd81a4a",
   "raw_rows": 5000,
   "raw_columns": 18,
