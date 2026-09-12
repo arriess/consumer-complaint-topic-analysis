@@ -25,12 +25,13 @@ OUTPUT_DIR = PROJECT_ROOT / "outputs" / "tables"
 # The original records come from the CFPB Consumer Complaint Database. The
 # project uses the fixed public 5,000-row snapshot below so the portfolio can be
 # reproduced against an immutable, verifiable input rather than a changing live
-# database export.
+# database export or a moving upstream branch.
 OFFICIAL_CFPB_URL = "https://www.consumerfinance.gov/data-research/consumer-complaints/"
+UPSTREAM_COMMIT = "edc801edb9a2a30172b0fc70b7c16b41a02d0368"
 DATA_URL = (
     "https://raw.githubusercontent.com/"
     "andygreen-1/Text_Analysis_Consumer_Complaints/"
-    "main/Data/complaints_sample.csv"
+    f"{UPSTREAM_COMMIT}/Data/complaints_sample.csv"
 )
 RAW_PATH = DATA_DIR / "complaints_sample.csv"
 MODELING_PATH = DATA_DIR / "complaints_modeling.csv"
@@ -152,7 +153,6 @@ def main() -> None:
     modeling = nonempty.drop_duplicates(subset=[narrative_col], keep="first").copy()
     word_counts = modeling[narrative_col].str.split().str.len()
 
-    # Add a stable normalized field while retaining all original metadata.
     if narrative_col != "consumer_complaint_narrative":
         modeling["consumer_complaint_narrative"] = modeling[narrative_col]
 
@@ -160,6 +160,7 @@ def main() -> None:
 
     summary = {
         "official_source": OFFICIAL_CFPB_URL,
+        "technical_snapshot_commit": UPSTREAM_COMMIT,
         "technical_snapshot_url": DATA_URL,
         "source_sha256": source_sha256,
         "raw_rows": int(len(df)),
