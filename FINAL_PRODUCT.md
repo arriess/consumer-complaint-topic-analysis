@@ -6,9 +6,15 @@ https://github.com/arriess/consumer-complaint-topic-analysis
 
 ## Purpose
 
-This repository contains the final reproducible NLP workflow for IU DLBDSEDA02 Task 1. It validates and preprocesses a public CFPB complaint sample, compares Bag of Words with TF-IDF, compares LDA with LSA/TruncatedSVD, evaluates candidate topic counts, and exports diagnostics, topic terms, representative complaints, assignment shares, and figures.
+This repository contains the final reproducible NLP workflow for IU DLBDSEDA02 Task 1. It validates and preprocesses a fixed public CFPB complaint sample, compares Bag of Words with TF-IDF, compares LDA with LSA/TruncatedSVD, evaluates candidate topic counts, exports diagnostics and interpretation evidence, and documents limitations and robustness.
 
-## Quick start
+## Verified environment
+
+- Python: **3.13.5** (`.python-version`)
+- Exact direct/transitive package environment: `requirements-lock.txt`
+- Compatible direct-dependency ranges: `requirements.txt`
+
+## Exact reproduction
 
 ### Windows PowerShell
 
@@ -30,37 +36,54 @@ pip install -r requirements-lock.txt
 python run_analysis.py
 ```
 
-For a compatible rather than exact environment, `requirements.txt` contains bounded version ranges.
-
-The acquisition step downloads the selected public `complaints_sample.csv` snapshot automatically when it is not already present. The verified source-file SHA-256 is documented in `data/README.md` and `REPRODUCIBILITY.md`.
+The acquisition stage downloads the selected fixed `complaints_sample.csv` when needed and verifies its SHA-256 before analysis. Official CFPB provenance, the exact technical snapshot URL, scope, and checksum are documented in `data/README.md`.
 
 ## Pipeline stages
 
-1. `src/01_acquire_validate.py` - download/validate the sample and remove empty/duplicate narratives.
+1. `src/01_acquire_validate.py` - checksum-validate the source, validate structure/scope, remove empty and exact-duplicate narratives.
 2. `src/02_preprocess.py` - clean and tokenize text using the submitted Phase 1 preprocessing plan.
 3. `src/03_vectorize_and_model.py` - create BoW/TF-IDF representations, fit LDA/LSA candidates, evaluate models, and generate outputs.
 4. Optional: `src/04_stability_check.py` - stress-test the selected LDA/LSA structures across five random seeds.
 
-`run_phase2.py` is retained as the historical development-phase runner; `run_analysis.py` is the neutral final entry point for the three core stages.
+`run_analysis.py` is the final core entry point. `run_phase2.py` is retained only as the historical development-phase runner and executes the same three core stages.
 
-## Automated outputs
+## Expected verification checkpoints
 
-The pipeline generates validation statistics, vectorization comparison, model diagnostics, topic terms, representative complaints, topic/component assignment shares, selected-model metadata, and diagnostic/prevalence figures.
+A correct run should reproduce the submitted fixed-seed analysis within normal deterministic library behavior:
 
-`topic_labels.csv` and `topic_prevalence_labeled.csv` are human-interpreted presentation tables created after inspecting the automated top terms, representative complaints, and assignment shares. This distinction prevents interpretive labels from being presented as automatically generated model output.
+- source: **5,000 rows x 18 columns**
+- exact duplicate narratives removed: **683**
+- final modeled documents: **4,316**
+- vector matrices: **4,316 x 5,000**
+- matrix sparsity: **98.82%**
+- LDA-8: NPMI **0.2411**, diversity **0.6375**, perplexity **759.25**
+- LSA-4: NPMI **0.3421**, diversity **0.8000**, explained variance **4.81%**
+- largest LDA document-assignment share: **53.82%**
 
-Generated source data, representative-complaint exports, and PNG figures are excluded from Git by default and are recreated by running the pipeline. Compact reference result tables remain committed for review.
+## Outputs and interpretation
 
-## Reproducibility and robustness
+The pipeline generates data validation, vectorization comparison, model diagnostics, topic terms, representative complaints, topic/component assignment shares, selected-model metadata, and figures.
 
-Before Phase 3 submission, the core workflow was independently re-run using the exact versions in `requirements-lock.txt`. The rerun reproduced the main dataset counts, vectorization dimensions, selected LDA/LSA diagnostics, and topic-assignment shares documented in `RESULTS_SUMMARY.md`.
+Compact reference tables are committed in `outputs/tables/`. Raw source/intermediate data, representative-complaint narrative exports, and PNG figures are recreated locally and are not committed by default.
 
-An additional five-seed stress test is committed in `outputs/tables/stability_check.csv`. It showed that 8-topic LDA retained a small mean NPMI advantage over 6-topic LDA and lower mean perplexity, while LSA-4 reproduced identical diagnostics across the tested seeds. This supports the submitted models while documenting LDA seed sensitivity rather than hiding it.
+`topic_labels.csv` and `topic_prevalence_labeled.csv` are human-interpreted presentation tables, not automatically generated class labels. `INTERPRETATION_NOTES.md` documents the top-term evidence behind each label. LSA assignment shares use the largest absolute component loading and are explicitly **not probabilities**.
 
-Run the optional robustness check after the core pipeline with:
+## Robustness check
+
+After the core run, execute:
 
 ```bash
 python src/04_stability_check.py
 ```
 
-Full verification details, exact package versions and the dataset checksum are in `REPRODUCIBILITY.md`.
+This writes `outputs/tables/stability_check.csv`. Across seeds 7, 21, 42, 84, and 123, LDA k=8 retained a small mean NPMI advantage over k=6 and lower mean perplexity, while LSA-4 reproduced the same diagnostics across the tested seeds. The result supports the submitted models while documenting LDA seed sensitivity instead of hiding it.
+
+## Documentation map
+
+- `README.md` - objective, method rationale, workflow, limitations
+- `RESULTS_SUMMARY.md` - executed findings
+- `INTERPRETATION_NOTES.md` - evidence behind topic labels
+- `REPRODUCIBILITY.md` - environment, checksum, rerun, stability evidence
+- `data/README.md` - official CFPB provenance and exact snapshot identity
+
+The repository is intentionally organized so that the analysis can be inspected at two levels: concise final documentation for review and executable source code/machine-readable results for verification.
