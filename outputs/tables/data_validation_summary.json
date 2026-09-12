@@ -1,5 +1,7 @@
 {
-  "source_url": "https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/main/Data/complaints_sample.csv",
+  "official_source": "https://www.consumerfinance.gov/data-research/consumer-complaints/",
+  "technical_snapshot_url": "https://raw.githubusercontent.com/andygreen-1/Text_Analysis_Consumer_Complaints/main/Data/complaints_sample.csv",
+  "source_sha256": "0f19b276e8f1863419a0cdcba6bf9ca2924046f21cd8958f79258b8ecfd81a4a",
   "raw_rows": 5000,
   "raw_columns": 18,
   "expected_rows": 5000,
@@ -13,5 +15,25 @@
     "median": 95.0,
     "mean": 158.57516794069957,
     "max": 3301
-  }
+  },
+  "distinct_product_count": 1,
+  "product_counts": {
+    "Credit reporting, credit repair services, or other personal consumer reports": 5000
+  },
+  "distinct_issue_count": 1,
+  "issue_counts": {
+    "Incorrect information on your report": 5000
+  },
+  "distinct_sub_issue_count": 7,
+  "sub_issue_counts": {
+    "Information belongs to someone else": 3146,
+    "Account status incorrect": 680,
+    "Account information incorrect": 617,
+    "Personal information incorrect": 209,
+    "Old information reappears or never goes away": 151,
+    "Public record information inaccurate": 116,
+    "Information is missing that should be on the report": 81
+  },
+  "date_received_min": "2019-10-01",
+  "date_received_max": "2020-09-29"
 }
