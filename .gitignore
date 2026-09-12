@@ -4,13 +4,18 @@ __pycache__/
 .venv/
 venv/
 
-# Generated data/results
+# Generated source/intermediate data are recreated from the verified snapshot.
 data/*.csv
-outputs/tables/*.json
-outputs/tables/*.csv
+
+# Representative complaint exports contain narrative text and are recreated
+# locally for interpretation; keep them out of the public repository.
+outputs/tables/representative_complaints.csv
+
+# Figures are reproducible generated artifacts. Their filenames and purpose are
+# documented in outputs/figures/README.md.
 outputs/figures/*.png
 
-# Keep directory documentation
+# Keep directory documentation and compact reference result tables tracked.
 !data/README.md
 
 # OS/editor
